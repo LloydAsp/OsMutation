@@ -10,7 +10,7 @@
 # OsMutation
 Convert Any OpenVZ/LXC VPS to Debian/CentOS/Alpine
 
-## Feature
+## Features
 - Support both Openvz 7 and Lxc
 - Support multiple operation systems
 
