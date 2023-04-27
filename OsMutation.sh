@@ -15,7 +15,7 @@ function print_help(){
 		╚██████╔╝███████║██║ ╚═╝ ██║╚██████╔╝   ██║   ██║  ██║   ██║   ██║╚██████╔╝██║ ╚████║
 		 ╚═════╝ ╚══════╝╚═╝     ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
                                                                                      
-		Converts Any OpenVZ/LXC VPS to Debian/CentOS/Alpine;
+		Convert Any OpenVZ/LXC VPS to Debian/CentOS/Alpine;
 		A fresh system will be installed and all old data will be wiped!
 		Author: Lloyd@nodeseek.com
 	EOF

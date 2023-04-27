@@ -8,11 +8,11 @@
 ```
 
 # OsMutation
-Converts Any OpenVZ/LXC VPS to Debian/CentOS/Alpine
+Convert Any OpenVZ/LXC VPS to Debian/CentOS/Alpine
 
 ## Feature
 - Support both Openvz 7 and Lxc
-- Support multiple operation system
+- Support multiple operation systems
 
 ## Usage
 ```
@@ -34,8 +34,8 @@ Openvz and Lxc are typical container virtualization technologys. The host OS ker
 So if you want to replace the operation system, you can just replace the files in the container. That's it, simple and straightforward. Just pay attention to the order of action since there are some dependences of files.
 
 ## Template Source
-Lxc templates are directly downloaded from http://images.linuxcontainers.org, opevz 7 templates are extracted from openvz 7 official iso.
+Lxc templates are directly downloaded from http://images.linuxcontainers.org, openvz 7 templates are extracted from openvz 7 official iso.
 
 ## To Do
-- Support Non-interactive mode by accepting arguments
-- Support Customed template source
+- Support non-interactive mode by accepting arguments
+- Support customed template source
