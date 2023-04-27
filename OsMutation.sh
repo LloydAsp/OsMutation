@@ -93,10 +93,10 @@ function download_rootfs(){
 
     if [ "$cttype" == 'lxc' ] ; then
         wget $download_link
-        tar -C /x -xf rootfs.tar.xz
+        tar -C /x -xvf rootfs.tar.xz
     else
         wget -O rootfs.tar.gz $download_link
-        tar -C /x -xzf rootfs.tar.gz
+        tar -C /x -xzvf rootfs.tar.gz
     fi
 }
 
