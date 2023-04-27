@@ -1,5 +1,5 @@
 #!/bin/bash
-# Converts Any OpenVZ/LXC VPS to Debian/CentOS/Alpine
+# Reinstall Any OpenVZ/LXC VPS to Debian/CentOS/Alpine
 # Author: Lloyd@nodeseek.com
 # WARNING: A fresh system will be installed and all old data will be wiped.
 # License: GPLv3; Partly based on https://gist.github.com/trimsj/c1fefd650b5f49ceb8f3efc1b6a1404d
@@ -15,8 +15,8 @@ function print_help(){
 		╚██████╔╝███████║██║ ╚═╝ ██║╚██████╔╝   ██║   ██║  ██║   ██║   ██║╚██████╔╝██║ ╚████║
 		 ╚═════╝ ╚══════╝╚═╝     ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
                                                                                      
-		Convert Any OpenVZ/LXC VPS to Debian/CentOS/Alpine;
-		A fresh system will be installed and all old data will be wiped!
+		Reinstall Any OpenVZ/LXC VPS to Debian/CentOS/Alpine;
+		[warning] A fresh system will be installed and all old data will be wiped!
 		Author: Lloyd@nodeseek.com
 	EOF
     echo -ne "\e[m"
