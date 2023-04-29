@@ -164,6 +164,7 @@ function post_install(){
         rc-update add sshd default
         rc-update add mdev sysinit
         rc-update add devfs sysinit
+        rc-update add networking default
     elif [[ $os_selected == *"debian"* ]]; then
         install ssh bash ifupdown
     elif [[ $os_selected == *"centos"* ]]; then
