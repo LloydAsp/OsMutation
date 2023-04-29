@@ -112,18 +112,24 @@ function migrate_configuration(){
     [ -d /x/etc/network/ ] || mkdir -p /x/etc/network/
     ipaddr=$(ip addr show dev $dev | grep global | awk '($1=="inet") {print $2}' | cut -d/ -f1 | head -1)
     hostname=$(hostname)
-    cat > /x/etc/network/interfaces <<- EOF
-		auto lo
-		iface lo inet loopback
 
-		auto $dev
-		iface $dev inet static
-		address $ipaddr
-		netmask 255.255.255.255
-		up ip route add default dev $dev
+    if [ -f /etc/network/interfaces ] ; then
+        cp -rf /etc/network/interfaces /x/etc/network/interfaces
+    else
+        cat > /x/etc/network/interfaces <<- EOF
+		    auto lo
+		    iface lo inet loopback
 
-		hostname $hostname
-	EOF
+		    auto $dev
+		    iface $dev inet static
+		    address $ipaddr
+		    netmask 255.255.255.255
+		    up ip route add default dev $dev
+
+		    hostname $hostname
+		EOF
+    fi
+
     rm /x/etc/resolv.conf
 	cat > /x/etc/resolv.conf <<- EOF
 		nameserver 8.8.8.8
@@ -154,14 +160,14 @@ function replace_os(){
 function post_install(){
     export PATH="/usr/sbin:/usr/bin:/sbin:/bin"
     if [[ $os_selected == *"alpine"* ]]; then
-        install openssh bash
+        install openssh bash ifupdown
         rc-update add sshd default
         rc-update add mdev sysinit
         rc-update add devfs sysinit
     elif [[ $os_selected == *"debian"* ]]; then
-        install ssh bash
+        install ssh bash ifupdown
     elif [[ $os_selected == *"centos"* ]]; then
-        install openssh bash
+        install openssh bash ifupdown
     fi
     echo PermitRootLogin yes >> /etc/ssh/sshd_config
     rm -rf /x /rootfs.tar.xz /rootfs.tar.gz
