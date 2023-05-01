@@ -160,15 +160,24 @@ function replace_os(){
 function post_install(){
     export PATH="/usr/sbin:/usr/bin:/sbin:/bin"
     if [[ $os_selected == *"alpine"* ]]; then
-        install openssh bash ifupdown
+        install openssh bash
         rc-update add sshd default
         rc-update add mdev sysinit
         rc-update add devfs sysinit
-        rc-update add networking default
+        if [ "$cttype" == 'lxc' ] ; then
+            install ifupdown
+            rc-update add networking default
+        fi
     elif [[ $os_selected == *"debian"* ]]; then
-        install ssh bash ifupdown
+        install ssh bash
+        if [ "$cttype" == 'lxc' ] ; then
+            install ifupdown
+        fi
     elif [[ $os_selected == *"centos"* ]]; then
-        install openssh bash ifupdown
+        install openssh bash
+        if [ "$cttype" == 'lxc' ] ; then
+            install ifupdown
+        fi
     fi
     echo PermitRootLogin yes >> /etc/ssh/sshd_config
     rm -rf /x /rootfs.tar.xz /rootfs.tar.gz
