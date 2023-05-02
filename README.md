@@ -13,7 +13,7 @@ or
 ```
 curl -so OsMutation.sh https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutation.sh && chmod u+x OsMutation.sh && ./OsMutation.sh
 ```
-[![asciicast](https://asciinema.org/a/582009.png?_)](https://asciinema.org/a/582009)
+[![asciicast](https://asciinema.org/a/582009.svg)](https://asciinema.org/a/582009)
 
 ## Notice
 - A fresh system will be installed and all old data will be wiped! Backup your important data first.
