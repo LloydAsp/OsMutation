@@ -72,9 +72,9 @@ function read_lxc_template(){
 
 function read_openvz_template(){
     releasetag="v0.0.1"
-    os_list=$(wget -qO- "https://api.github.com/repos/LloydAsp/OsMutation/releases/tags/$releasetag" | \
-    sed -nE '/"name"/s/.* "(.*)\.tar\.gz.*$/\1/p' | \
-    grep -E "(debian)|(centos)|(alpine)" )
+    os_list=$(wget -qO- "https://github.com/LloydAsp/OsMutation/releases/expanded_assets/v0.0.1" | \
+        sed -nE '/tar.gz/s/.*>([^<>]+\.tar\.gz).*/\1/p' | \
+        grep -E "(debian)|(centos)|(alpine)" )
     echo "$os_list" | nl
 
     while [ -z "${os_index##*[!0-9]*}" ]; 
