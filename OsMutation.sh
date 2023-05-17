@@ -23,7 +23,8 @@ function print_help(){
 }
 
 function read_virt_tech(){
-    cttype=$(systemd-detect-virt)
+    install virt-what
+    cttype=$(virt-what)
     if [[ $cttype == "lxc" || $cttype == "openvz" ]]; then
     	echo -e '\e[1;32mYour container type: $cttype \e[m'
     else
