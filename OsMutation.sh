@@ -26,9 +26,9 @@ function read_virt_tech(){
     install virt-what
     cttype=$(virt-what)
     if [[ $cttype == "lxc" || $cttype == "openvz" ]]; then
-    	echo -e '\e[1;32mYour container type: $cttype \e[m'
+        [[ $cttype == "lxc" ]] && echo -e '\e[1;32mYour container type: lxc\e[m' || echo -e '\e[1;32mYour container type: openvz\e[m'
     else
-    	while [ "$cttype" != 'lxc' -a "$cttype" != 'openvz' ] ; do
+        while [ "$cttype" != 'lxc' -a "$cttype" != 'openvz' ] ; do
             echo -n "please input container type (lxc/openvz):"
             read cttype  < /dev/tty
         done
