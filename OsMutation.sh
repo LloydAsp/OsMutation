@@ -27,7 +27,10 @@ function read_virt_tech(){
     if [[ $cttype == "lxc" || $cttype == "openvz" ]]; then
     	echo -e '\e[1;32mYour container type: $cttype \e[m'
     else
-    	echo "Error: Not Supported container type!"
+    	while [ "$cttype" != 'lxc' -a "$cttype" != 'openvz' ] ; do
+            echo -n "please input container type (lxc/openvz):"
+            read cttype  < /dev/tty
+        done
     fi
 }
 
