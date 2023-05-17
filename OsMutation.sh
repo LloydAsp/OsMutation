@@ -23,10 +23,16 @@ function print_help(){
 }
 
 function read_virt_tech(){
-    while [ "$cttype" != 'lxc' -a "$cttype" != 'openvz' ] ; do
-        echo -n "please input container type (lxc/openvz):"
-        read cttype  < /dev/tty
-    done
+    install virt-what
+    cttype=$(virt-what)
+    if [[ $cttype == "lxc" || $cttype == "openvz" ]]; then
+    	echo -e '\e[1;32mYour container type: $cttype \e[m'
+    else
+    	while [ "$cttype" != 'lxc' -a "$cttype" != 'openvz' ] ; do
+            echo -n "please input container type (lxc/openvz):"
+            read cttype  < /dev/tty
+        done
+    fi
 }
 
 function install(){
