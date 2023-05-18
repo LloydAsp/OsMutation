@@ -122,17 +122,21 @@ function migrate_configuration(){
     gateway_line="up ip route add $route_part"
 
     # manual save network
-    cat > /x/etc/network/interfaces <<- EOF
-		auto lo
-		iface lo inet loopback
+    if [ -f /etc/network/interfaces ] && grep static /etc/network/interfaces > /dev/null ; then
+        cp -rf /etc/network/interfaces /x/etc/network/interfaces
+    else
+        cat > /x/etc/network/interfaces <<- EOF
+			auto lo
+			iface lo inet loopback
 
-		auto $dev
-		iface $dev inet static
-		address $ipaddr_with_mask
-		$gateway_line
+			auto $dev
+			iface $dev inet static
+			address $ipaddr_with_mask
+			$gateway_line
 
-		hostname $hostname
-	EOF
+			hostname $hostname
+		EOF
+    fi
 
     rm /x/etc/resolv.conf
 	cat > /x/etc/resolv.conf <<- EOF
