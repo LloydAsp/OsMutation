@@ -35,3 +35,5 @@ LXC templates are directly downloaded from http://images.linuxcontainers.org, Op
 - Support non-interactive mode by accepting arguments
 - Support customed template source
 - Support more operating system 
+- Fix networking bug of CentOS under LXC
+- Auto configure ipv6 network

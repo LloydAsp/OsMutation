@@ -26,10 +26,10 @@ function read_virt_tech(){
     install virt-what
     cttype=$(virt-what)
     if [[ $cttype == "lxc" || $cttype == "openvz" ]]; then
-        [[ $cttype == "lxc" ]] && echo -e '\e[1;32mYour container type: lxc\e[m' || echo -e '\e[1;32mYour container type: openvz\e[m'
+        [[ $cttype == "lxc" ]] && echo -e '\e[1;33mYour container type: lxc\e[m' || echo -e '\e[1;33mYour container type: openvz\e[m'
     else
         while [ "$cttype" != 'lxc' -a "$cttype" != 'openvz' ] ; do
-            echo -n "please input container type (lxc/openvz):"
+            echo -ne "\e[1;33mplease input container type (lxc/openvz):\e[m"
             read cttype  < /dev/tty
         done
     fi
@@ -67,7 +67,7 @@ function read_lxc_template(){
 
     while [ -z "${os_index##*[!0-9]*}" ]; 
     do
-        echo -n "please select os (input number):"
+        echo -ne "\e[1;33mplease select os (input number):\e[m"
         read os_index < /dev/tty
     done
 
@@ -116,25 +116,23 @@ function migrate_configuration(){
     # save network configuration
     dev=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
     [ -d /x/etc/network/ ] || mkdir -p /x/etc/network/
-    ipaddr=$(ip addr show dev $dev | grep global | awk '($1=="inet") {print $2}' | cut -d/ -f1 | head -1)
+    ipaddr_with_mask=$(ip addr show dev $dev | sed -nE '/global/s/.*inet (.+) brd.*$/\1/p' | head -n 1)
     hostname=$(hostname)
+    route_part="$(ip route show default 0.0.0.0/0 | sed -E 's/^(.*dev [^ ]+).*$/\1/')"
+    gateway_line="up ip route add $route_part"
 
-    if [ -f /etc/network/interfaces ] ; then
-        cp -rf /etc/network/interfaces /x/etc/network/interfaces
-    else
-        cat > /x/etc/network/interfaces <<- EOF
-		    auto lo
-		    iface lo inet loopback
+    # manual save network
+    cat > /x/etc/network/interfaces <<- EOF
+		auto lo
+		iface lo inet loopback
 
-		    auto $dev
-		    iface $dev inet static
-		    address $ipaddr
-		    netmask 255.255.255.255
-		    up ip route add default dev $dev
+		auto $dev
+		iface $dev inet static
+		address $ipaddr_with_mask
+		$gateway_line
 
-		    hostname $hostname
-		EOF
-    fi
+		hostname $hostname
+	EOF
 
     rm /x/etc/resolv.conf
 	cat > /x/etc/resolv.conf <<- EOF
@@ -173,22 +171,33 @@ function post_install(){
         if [ "$cttype" == 'lxc' ] ; then
             install ifupdown
             rc-update add networking default
+            sed -i 's/--auto/-a/' /etc/init.d/networking # fix bug in networking script of lxc
         fi
     elif [[ $os_selected == *"debian"* ]]; then
         install ssh bash
         if [ "$cttype" == 'lxc' ] ; then
             install ifupdown
+            systemctl disable systemd-networkd.service
         fi
     elif [[ $os_selected == *"centos"* ]]; then
         install openssh bash
         if [ "$cttype" == 'lxc' ] ; then
             install ifupdown
+            systemctl disable systemd-networkd.service
+            # To-Do: Network service of CentOS need modify
         fi
     fi
     echo PermitRootLogin yes >> /etc/ssh/sshd_config
     rm -rf /x /rootfs.tar.xz /rootfs.tar.gz
     sync
-    reboot -f
+    while [ "$reboot_ans" != 'yes' -a "$reboot_ans" != 'no' ] ; do
+        echo -ne "\e[1;33mreboot now? (yes/no):\e[m"
+        read reboot_ans  < /dev/tty
+    done
+
+    if [ "$reboot_ans" == 'yes' ] ; then
+        reboot -f
+    fi
 }
 
 function main(){
