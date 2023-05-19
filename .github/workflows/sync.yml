@@ -1,0 +1,38 @@
+name: Build V2Ray rules dat files
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set variables
+        run: |
+          echo "RELEASE_NAME=LXC images Released on $(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+          echo "TAG_NAME=LXC-$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Move and zip files and generate sha256 hash
+        run: |
+          server=http://images.linuxcontainers.org
+          path=$(wget -qO- ${server}/meta/1.0/index-system | grep -v edge | grep default | awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386")) {print $NF}')
+          os_index=$(wget -qO- ${server}/meta/1.0/index-system | grep -v edge | grep default | awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386")) {print $NF}' | wc -l)
+          os_list=$(echo "$path" | sed -E 's%/images/(.*)/default/.*/%\1%g' | sed 's%/%-%g')
+          i=1
+          while [[ $i -le $os_index ]]; do
+              echo "This is $i"
+              ((i++))
+          done
+
+
+      - name: Release and upload assets
+        uses: softprops/action-gh-release@v0.1.6
+        with:
+          name: ${{ env.RELEASE_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+          files: |
+            ./publish/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

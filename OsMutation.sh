@@ -23,7 +23,6 @@ function print_help(){
 }
 
 function read_virt_tech(){
-    install virt-what
     cttype=$(virt-what)
     if [[ $cttype == "lxc" || $cttype == "openvz" ]]; then
         [[ $cttype == "lxc" ]] && echo -e '\e[1;33mYour container type: lxc\e[m' || echo -e '\e[1;33mYour container type: openvz\e[m'
@@ -147,9 +146,9 @@ function migrate_configuration(){
 
 function install_requirement(){
     if [ -n "$(command -v apk)" ] ; then
-        install sed gawk wget gzip rsync xz
+        install sed gawk wget gzip rsync xz virt-what
     else
-        install sed gawk wget gzip rsync xz-utils
+        install sed gawk wget gzip rsync xz-utils virt-what
     fi
 }
 
