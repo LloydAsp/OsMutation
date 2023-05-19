@@ -23,7 +23,7 @@ function print_help(){
 }
 
 function read_virt_tech(){
-    cttype=$(virt-what)
+    cttype=$(virt-what | sed -n 1p)
     if [[ $cttype == "lxc" || $cttype == "openvz" ]]; then
         [[ $cttype == "lxc" ]] && echo -e '\e[1;33mYour container type: lxc\e[m' || echo -e '\e[1;33mYour container type: openvz\e[m'
     else
