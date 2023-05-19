@@ -1,6 +1,8 @@
-name: Fetch LXC images from linuxcontainers.org
+name: Fetch LXC images from linuxcontainers
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 22 * * *"
 
 jobs:
   build:
@@ -8,11 +10,11 @@ jobs:
     steps:
       - name: Set variables
         run: |
-          echo "RELEASE_NAME=LXC images Released on $(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+          echo "RELEASE_NAME=LXC images fetched on $(date +%Y%m%d%H%M)" >> $GITHUB_ENV
           echo "TAG_NAME=LXC-$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
         shell: bash
 
-      - name: Fetch LXC images from linuxcontainers.org
+      - name: Fetch LXC images from linuxcontainers
         run: |
           server=http://images.linuxcontainers.org
           path=$(wget -qO- ${server}/meta/1.0/index-system | grep -v edge | grep default | awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386")) {print $NF}')
