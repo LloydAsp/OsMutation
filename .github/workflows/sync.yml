@@ -18,9 +18,18 @@ jobs:
           path=$(wget -qO- ${server}/meta/1.0/index-system | grep -v edge | grep default | awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386")) {print $NF}')
           os_index=$(wget -qO- ${server}/meta/1.0/index-system | grep -v edge | grep default | awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386")) {print $NF}' | wc -l)
           os_list=$(echo "$path" | sed -E 's%/images/(.*)/default/.*/%\1%g' | sed 's%/%-%g')
+
+          mkdir ./publish
+          cd ./publish
+
           i=1
           while [[ $i -le $os_index ]]; do
-              echo "This is $i"
+              os_file=$(echo "$os_list" | head -n $os_index | tail -n 1)
+              os_path=$(echo "$path" | head -n $os_index | tail -n 1)
+              download_link=${server}/${os_path}/${os_file}.tar.xz
+
+              wget -N $download_link
+
               ((i++))
           done
 
