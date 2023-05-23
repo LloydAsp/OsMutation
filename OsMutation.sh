@@ -60,7 +60,7 @@ function read_lxc_template(){
     if [[ -n $last_lxc_version ]]; then
         image_list=$(curl -Ls "https://api.github.com/repos/LloydAsp/OsMutation/releases/latest" | grep "LXC" | grep '"browser_download_url":' | sed -E 's/.*"([^"]+)".*/\1/')
 
-        os_list=$(curl -Ls "https://api.github.com/repos/LloydAsp/OsMutation/releases/latest" | grep "LXC" | grep '"browser_download_url":' | sed -E 's/.*"([^"]+)".*/\1/' | sed "s/https\:\/\/github.com\/LloydAsp\/OsMutation\/releases\/download\/${last_lxc_version}\///g" | sed "s/tar\.gz//g")
+        os_list=$(curl -Ls "https://api.github.com/repos/LloydAsp/OsMutation/releases/latest" | grep "LXC" | grep '"browser_download_url":' | sed -E 's/.*"([^"]+)".*/\1/' | sed "s/https\:\/\/github.com\/LloydAsp\/OsMutation\/releases\/download\/${last_lxc_version}\///g" | sed "s/\.tar\.gz//g")
         echo "$os_list" | nl
 
         while [ -z "${os_index##*[!0-9]*}" ]; do
@@ -160,9 +160,9 @@ function migrate_configuration(){
 
 function install_requirement(){
     if [ -n "$(command -v apk)" ] ; then
-        install sed gawk wget gzip rsync xz virt-what
+        install curl sed gawk wget gzip rsync xz virt-what
     else
-        install sed gawk wget gzip rsync xz-utils virt-what
+        install curl sed gawk wget gzip rsync xz-utils virt-what
     fi
 }
 
