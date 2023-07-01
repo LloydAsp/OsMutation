@@ -23,8 +23,7 @@ function print_help(){
 }
 
 function read_virt_tech(){
-    install virt-what
-    cttype=$(virt-what)
+    cttype=$(virt-what | sed -n 1p)
     if [[ $cttype == "lxc" || $cttype == "openvz" ]]; then
         [[ $cttype == "lxc" ]] && echo -e '\e[1;33mYour container type: lxc\e[m' || echo -e '\e[1;33mYour container type: openvz\e[m'
     else
@@ -57,23 +56,37 @@ function install(){
 }
 
 function read_lxc_template(){
-    server=http://images.linuxcontainers.org
-    path=$(wget -qO- ${server}/meta/1.0/index-system | \
-        grep -v edge | grep default | \
-        awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386")) {print $NF}')
+    last_lxc_version=$(curl -Ls "https://api.github.com/repos/LloydAsp/OsMutation/releases/latest" | grep "LXC" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    if [[ -n $last_lxc_version ]]; then
+        image_list=$(curl -Ls "https://api.github.com/repos/LloydAsp/OsMutation/releases/latest" | grep "LXC" | grep '"browser_download_url":' | sed -E 's/.*"([^"]+)".*/\1/')
 
-    os_list=$( echo "$path" | sed -E 's%/images/(.*)/default/.*/%\1%g' | sed 's%/%-%g' )
-    echo "$os_list" | nl
+        os_list=$(curl -Ls "https://api.github.com/repos/LloydAsp/OsMutation/releases/latest" | grep "LXC" | grep '"browser_download_url":' | sed -E 's/.*"([^"]+)".*/\1/' | sed "s/https\:\/\/github.com\/LloydAsp\/OsMutation\/releases\/download\/${last_lxc_version}\///g" | sed "s/\.tar\.gz//g")
+        echo "$os_list" | nl
 
-    while [ -z "${os_index##*[!0-9]*}" ]; 
-    do
-        echo -ne "\e[1;33mplease select os (input number):\e[m"
-        read os_index < /dev/tty
-    done
+        while [ -z "${os_index##*[!0-9]*}" ]; do
+            echo -ne "\e[1;33mplease select os (input number):\e[m"
+            read os_index < /dev/tty
+        done
 
-    path=$( echo "$path" | head -n $os_index | tail -n 1)
-    os_selected=$(echo "$os_list" | head -n $os_index | tail -n 1 )
-    download_link=${server}/${path}/rootfs.tar.xz
+        download_link=$(echo "$image_list" | head -n $os_index | tail -n 1)
+    else
+        server=http://images.linuxcontainers.org
+        path=$(wget -qO- ${server}/meta/1.0/index-system | \
+            grep -v edge | grep default | \
+            awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386")) {print $NF}')
+
+        os_list=$( echo "$path" | sed -E 's%/images/(.*)/default/.*/%\1%g' | sed 's%/%-%g' )
+        echo "$os_list" | nl
+
+        while [ -z "${os_index##*[!0-9]*}" ]; do
+            echo -ne "\e[1;33mplease select os (input number):\e[m"
+            read os_index < /dev/tty
+        done
+
+        path=$( echo "$path" | head -n $os_index | tail -n 1)
+        os_selected=$(echo "$os_list" | head -n $os_index | tail -n 1 )
+        download_link=${server}/${path}/rootfs.tar.xz
+    fi
 }
 
 function read_openvz_template(){
@@ -98,7 +111,7 @@ function download_rootfs(){
     mkdir /x
 
     if [ "$cttype" == 'lxc' ] ; then
-        wget $download_link
+        wget -O rootfs.tar.xz $download_link
         tar -C /x -xvf rootfs.tar.xz
     else
         wget -O rootfs.tar.gz $download_link
@@ -147,9 +160,9 @@ function migrate_configuration(){
 
 function install_requirement(){
     if [ -n "$(command -v apk)" ] ; then
-        install sed gawk wget gzip rsync xz
+        install curl sed gawk wget gzip rsync xz virt-what
     else
-        install sed gawk wget gzip rsync xz-utils
+        install curl sed gawk wget gzip rsync xz-utils virt-what
     fi
 }
 
