@@ -154,7 +154,7 @@ function install_requirement(){
 }
 
 function replace_os(){
-    rsync -a -v \
+    rsync -ax -v \
         --delete-after \
         --ignore-times \
         --exclude="/dev" \
@@ -167,24 +167,24 @@ function replace_os(){
 
 function post_install(){
     export PATH="/usr/sbin:/usr/bin:/sbin:/bin"
-    if [[ $os_selected == *"alpine"* ]]; then
+    if grep -qi alpine /etc/issue; then
         install openssh bash
         rc-update add sshd default
         rc-update add mdev sysinit
         rc-update add devfs sysinit
         if [ "$cttype" == 'lxc' ] ; then
-            install ifupdown
+            apk add ifupdown
             rc-update add networking default
             sed -i 's/--auto/-a/' /etc/init.d/networking # fix bug in networking script of lxc
         fi
-    elif [[ $os_selected == *"debian"* ]]; then
-        install ssh bash
+    elif grep -qi debian /etc/issue; then
+        install ssh
         if [ "$cttype" == 'lxc' ] ; then
             install ifupdown
             systemctl disable systemd-networkd.service
         fi
-    elif [[ $os_selected == *"centos"* ]]; then
-        install openssh bash
+    elif grep -qi centos /etc/issue; then
+        install openssh
         if [ "$cttype" == 'lxc' ] ; then
             install ifupdown
             systemctl disable systemd-networkd.service
