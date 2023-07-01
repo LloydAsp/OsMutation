@@ -186,7 +186,7 @@ function post_install(){
         rc-update add mdev sysinit
         rc-update add devfs sysinit
         if [ "$cttype" == 'lxc' ] ; then
-            apk add ifupdown
+            apk add ifupdown-ng
             rc-update add networking default
             sed -i 's/--auto/-a/' /etc/init.d/networking # fix bug in networking script of lxc
         fi
