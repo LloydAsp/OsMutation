@@ -111,11 +111,11 @@ function download_rootfs(){
     mkdir /x
 
     if [ "$cttype" == 'lxc' ] ; then
-        wget -O rootfs.tar.xz $download_link
-        tar -C /x -xvf rootfs.tar.xz
+        #rootfs.tar.xz
+        wget -qO- $download_link | tar -C /x -xJv
     else
-        wget -O rootfs.tar.gz $download_link
-        tar -C /x -xzvf rootfs.tar.gz
+        #rootfs.tar.gz
+        wget -qO- $download_link | tar -C /x -xzv
     fi
 }
 
@@ -160,22 +160,27 @@ function migrate_configuration(){
 
 function install_requirement(){
     if [ -n "$(command -v apk)" ] ; then
-        install curl sed gawk wget gzip rsync xz virt-what
+        install curl sed gawk wget gzip xz tar virt-what
     else
-        install curl sed gawk wget gzip rsync xz-utils virt-what
+        install curl sed gawk wget gzip xz-utils virt-what
     fi
 }
 
+function chroot_run(){
+    if grep -qi alpine /x/etc/issue; then
+        chroot "/x/" sh -c "[ -f /bin/bash ] || apk add bash"
+    fi
+    chroot "/x/" /bin/bash -c "$*"
+}
+
 function replace_os(){
-    rsync -ax -v \
-        --delete-after \
-        --ignore-times \
-        --exclude="/dev" \
-        --exclude="/proc" \
-        --exclude="/sys" \
-        --exclude="/x" \
-        --exclude="/run" \
-        /x/* /  
+    mkdir /x/oldroot
+    mount --bind / /x/oldroot
+    chroot_run 'cd /oldroot; '`
+        `'rm -rf $(ls /oldroot | grep -vE "(^dev|^proc|^sys|^run|^x)") ; '`
+        `'cd /; '`
+        `'mv -f $(ls / | grep -vE "(^dev|^proc|^sys|^run|^oldroot)") /oldroot'
+    umount /x/oldroot
 }
 
 function post_install(){
@@ -205,7 +210,7 @@ function post_install(){
         fi
     fi
     echo PermitRootLogin yes >> /etc/ssh/sshd_config
-    rm -rf /x /rootfs.tar.xz /rootfs.tar.gz
+    rm -rf /x
     sync
     while [ "$reboot_ans" != 'yes' -a "$reboot_ans" != 'no' ] ; do
         echo -ne "\e[1;33mreboot now? (yes/no):\e[m"
