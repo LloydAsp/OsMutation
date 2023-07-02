@@ -13,7 +13,8 @@ or
 ```
 curl -so OsMutation.sh https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutation.sh && chmod u+x OsMutation.sh && ./OsMutation.sh
 ```
-for vps whose disk is small (experimental support)
+for vps whose disk is small (less than 1GiB, experimental support)
+
 ```
 wget -qO OsMutation.sh https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutationTight.sh && chmod u+x OsMutation.sh && ./OsMutation.sh
 ```
