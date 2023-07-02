@@ -30,7 +30,7 @@ jobs:
             os_path=$(echo "$path" | head -n $i | tail -n 1)
             download_link=${server}/${os_path}/rootfs.tar.xz
           
-            wget $download_link -O ${os_file}.tar.gz
+            wget $download_link -O ${os_file}.tar.xz
           
             ((i++))
           done
