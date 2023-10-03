@@ -114,7 +114,7 @@ function download_rootfs(){
         #rootfs.tar.xz
         wget -qO- $download_link | tar -C /oldroot -xJv --delay-directory-restore --exclude="dev" --exclude="proc" --exclude="run" --exclude="sys"
     else
-        wget -qO- $download_link | tar -C /oldroot -xJv --delay-directory-restore --exclude="dev" --exclude="proc" --exclude="run" --exclude="sys"
+        wget -qO- $download_link | tar -C /oldroot -xzv --delay-directory-restore --exclude="dev" --exclude="proc" --exclude="run" --exclude="sys"
     fi
 }
 
