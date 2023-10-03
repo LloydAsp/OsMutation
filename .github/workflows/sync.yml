@@ -18,7 +18,7 @@ jobs:
         run: |
           server=http://images.linuxcontainers.org
           path=$(wget -qO- ${server}/meta/1.0/index-system | grep -v edge | grep default | awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386" || $3=="arm64")) {print $NF}')
-          os_index=$(wget -qO- ${server}/meta/1.0/index-system | grep -v edge | grep default | awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386" || $3=="arm64")) {print $NF}' | wc -l)
+          os_index=$(echo "$path" | wc -l)
           os_list=$(echo "$path" | sed -E 's%/images/(.*)/default/.*/%\1%g' | sed 's%/%-%g')
 
           mkdir ./publish

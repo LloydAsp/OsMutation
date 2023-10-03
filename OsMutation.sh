@@ -59,8 +59,13 @@ function read_lxc_template(){
     last_lxc_version=$(curl -Ls "https://api.github.com/repos/LloydAsp/OsMutation/releases/latest" | grep "LXC" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     if [[ -n $last_lxc_version ]]; then
         image_list=$(curl -Ls "https://api.github.com/repos/LloydAsp/OsMutation/releases/latest" | grep "LXC" | grep '"browser_download_url":' | sed -E 's/.*"([^"]+)".*/\1/')
+        if [ "$(uname -m)" == "aarch64" ] ; then
+            image_list="$(echo "$image_list" | grep arm64)"
+        else
+            image_list="$(echo "$image_list" | grep -v arm64)"
+        fi
 
-        os_list=$(curl -Ls "https://api.github.com/repos/LloydAsp/OsMutation/releases/latest" | grep "LXC" | grep '"browser_download_url":' | sed -E 's/.*"([^"]+)".*/\1/' | sed "s/https\:\/\/github.com\/LloydAsp\/OsMutation\/releases\/download\/${last_lxc_version}\///g" | sed "s/\.tar\.gz//g")
+        os_list=$(echo "$image_list" | sed "s/https\:\/\/github.com\/LloydAsp\/OsMutation\/releases\/download\/${last_lxc_version}\///g" | sed "s/\.tar\.gz//g")
         echo "$os_list" | nl
 
         while [ -z "${os_index##*[!0-9]*}" ]; do
@@ -74,6 +79,12 @@ function read_lxc_template(){
         path=$(wget -qO- ${server}/meta/1.0/index-system | \
             grep -v edge | grep default | \
             awk '-F;' '(( $1=="debian" || $1=="centos" || $1=="alpine") && ( $3=="amd64" || $3=="i386")) {print $NF}')
+
+        if [ "$(uname -m)" == "aarch64" ] ; then
+            path="$(echo $path | grep arm64)"
+        else
+            path="$(echo $path | grep -v arm64)"
+        fi
 
         os_list=$( echo "$path" | sed -E 's%/images/(.*)/default/.*/%\1%g' | sed 's%/%-%g' )
         echo "$os_list" | nl
