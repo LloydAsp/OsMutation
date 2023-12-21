@@ -170,6 +170,9 @@ function migrate_configuration(){
 }
 
 function install_requirement(){
+    # prevent no access on ipv6 only vps
+    ping -c 3 api.github.com || echo "nameserver 2a00:1098:2c::1"  >  /etc/resolv.conf 
+    
     if [ -n "$(command -v apk)" ] ; then
         install curl sed gawk wget gzip xz tar virt-what
     else
