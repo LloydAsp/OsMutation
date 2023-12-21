@@ -205,9 +205,6 @@ function post_install(){
 }
 
 function install_requirement(){
-    # prevent no access on ipv6 only vps
-    ping -c 3 api.github.com || echo "nameserver 2a00:1098:2c::1"  >  /etc/resolv.conf 
-    
     if [ -n "$(command -v apk)" ] ; then
         install curl sed gawk wget gzip xz tar virt-what
     else
@@ -236,6 +233,9 @@ function main(){
 }
 
 function make_temp_os(){
+    # prevent no access on ipv6 only vps
+    ping -c 3 api.github.com || echo "nameserver 2a00:1098:2c::1"  >  /etc/resolv.conf 
+    
     temp_os_url="https://github.com/LloydAsp/OsMutation/releases/download/utils/alpine-3.18-chroot.tar.gz"
     mkdir /x
     if [ -n "$(command -v wget)" ] ; then
