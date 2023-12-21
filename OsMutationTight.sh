@@ -204,9 +204,21 @@ function post_install(){
     fi
 }
 
+function install_requirement(){
+    # prevent no access on ipv6 only vps
+    ping -c 3 api.github.com || echo "nameserver 2a00:1098:2c::1"  >  /etc/resolv.conf 
+    
+    if [ -n "$(command -v apk)" ] ; then
+        install curl sed gawk wget gzip xz tar virt-what
+    else
+        install curl sed gawk wget gzip xz-utils virt-what
+    fi
+}
+
 function main(){
     print_help
     echo -e '\e[1;32minstall requirement...\e[m'
+    install_requirement
     read_virt_tech
 
     if [ "$cttype" == 'lxc' ] ; then
