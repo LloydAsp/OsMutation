@@ -124,10 +124,10 @@ function download_rootfs(){
     if [ "$cttype" == 'lxc' ] ; then
         #rootfs.tar.xz
         wget -qO- $download_link | tar -C /x -xJv
-    else if [ "$cttype" == 'openvz' ] ; then
+    elif [ "$cttype" == 'openvz' ] ; then
         #rootfs.tar.gz
         wget -qO- $download_link | tar -C /x -xzv
-    else if [ "$cttype" == 'kvm' ] ; then
+    elif [ "$cttype" == 'kvm' ] ; then
        echo "kvm is not supported by this script"
        exit 1
     fi
@@ -250,7 +250,7 @@ function main(){
     elif [ "$cttype" == 'lxc' ] ; then
         read_lxc_template
     elif [ "$cttype" == 'kvm' ] ; then
-        curl -qo takeover.sh https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutationKvm.sh
+        curl -qo OsMutationKvm.sh https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutationKvm.sh
         chmod u+x OsMutationKvm.sh
         ./OsMutationKvm.sh
         exit 0
