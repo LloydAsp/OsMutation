@@ -105,6 +105,7 @@ function migrate_configuration(){
     sed -i '/^root:/d' "/$dest_os_dir/etc/shadow"
     grep '^root:' /etc/shadow >> "/$dest_os_dir/etc/shadow"
     [ -d /root/.ssh ] && cp -a "/root/.ssh" "/$dest_os_dir/root/"
+    mkdir -p "/$dest_os_dir/etc/udev/rules.d/"
     [ -f /etc/udev/rules.d/70-persistent-net.rules ] && cp -a "/etc/udev/rules.d/70-persistent-net.rules" "/$dest_os_dir/etc/udev/rules.d/70-persistent-net.rules"
 
     # save network configuration
@@ -146,8 +147,52 @@ function chroot_run(){
     chroot "/x/" /bin/bash -c "$*"
 }
 
+change_hostname() {
+    local new_hostname="$1"
+    local os_release
+
+    # Detect the Linux distribution
+    if [ -f "/etc/alpine-release" ]; then
+        os_release="alpine"
+    elif [ -f "/etc/debian_version" ]; then
+        os_release="debian"
+    elif [ -f "/etc/centos-release" ]; then
+        os_release="centos"
+    else
+        echo "Unsupported Linux distribution."
+        return 1
+    fi
+
+    # Change hostname based on distribution
+    case "$os_release" in
+        "alpine")
+            echo "$new_hostname" > /etc/hostname
+            hostname -F /etc/hostname
+            ;;
+        "debian")
+            echo "$new_hostname" > /etc/hostname
+            hostnamectl set-hostname "$new_hostname"
+            ;;
+        "centos")
+            echo "NETWORKING=yes" > /etc/sysconfig/network
+            echo "HOSTNAME=$new_hostname" >> /etc/sysconfig/network
+            hostnamectl set-hostname "$new_hostname"
+            ;;
+    esac
+
+    echo "Hostname changed to $new_hostname. Please restart your system to apply changes."
+}
+
+
 function post_install(){
     export PATH="/usr/sbin:/usr/bin:/sbin:/bin"
+
+    root_partition="$(df / | awk 'NR==2 {print $1}')"
+    root_partition_type="$(df -T / | awk 'NR==2 {print $2}')"
+    target_disk=$(echo "$root_partition" | sed 's/[0-9]*$//')
+    echo "$root_partition /               $root_partition_type   defaults    0       1" > /etc/fstab
+    mkdir -p /boot/grub
+
     if grep -qi alpine /etc/issue; then
         install openssh bash
         rc-update add sshd default
@@ -156,41 +201,30 @@ function post_install(){
         apk add ifupdown-ng
         rc-update add networking default
         sed -i 's/--auto/-a/' /etc/init.d/networking # fix bug in networking script of lxc
+        change_hostname alpine
+        install grub grub-bios linux-lts
+        echo 'GRUB_CMDLINE_LINUX_DEFAULT="quiet rootfstype=ext4 modules=sd-mod,usb-storage,ext4"' >> /etc/default/grub
+        grub-mkconfig -o /boot/grub/grub.cfg
     elif grep -qi debian /etc/issue; then
         install ssh ifupdown
         systemctl disable systemd-networkd.service
+        change_hostname debian
+        install fdisk linux-image-generic grub-pc
+        grub-install "$target_disk"
+        update-grub
+        #upgrade-from-grub-legacy
     elif grep -qi centos /etc/issue; then
         install openssh ifupdown
         systemctl disable systemd-networkd.service
+        change_hostname centos
+        install fdisk linux-image-generic grub-pc
+        grub-install "$target_disk"
+        update-grub
+        #upgrade-from-grub-legacy
     fi
     echo PermitRootLogin yes >> /etc/ssh/sshd_config
-
-
-    root_partition="$(df / | awk 'NR==2 {print $1}')"
-    root_partition_type="$(df -T / | awk 'NR==2 {print $2}')"
-    target_disk=$(echo "$root_partition" | sed 's/[0-9]*$//')
-    echo "$root_partition /               $root_partition_type   defaults    0       1" > /etc/fstab
-
-    mkdir -p /boot/grub
-    install linux-image-generic grub-pc
-    grub-install /dev/"$target_disk"
-    update-grub
-
     rm -rf /x
     sync
-    # update grub
-    #echo '手动运行 update-grub， grub-install /dev/sda'
-    #upgrade-from-grub-legacy
-    sync
-
-    while [ "$reboot_ans" != 'yes' -a "$reboot_ans" != 'no' ] ; do
-        echo -ne "\e[1;33mreboot now? (yes/no):\e[m"
-        read reboot_ans
-    done
-
-    if [ "$reboot_ans" == 'yes' ] ; then
-        reboot -f
-    fi
 }
 
 function install_requirement(){
@@ -263,7 +297,17 @@ function make_temp_os(){
 
     echo -e '\e[1;32mpost processing...\e[m'
     /busybox cp /OsMutationKvm.sh /oldroot
+    /busybox chroot /oldroot apk add bash &> /dev/null # for alpine
     /busybox chroot /oldroot env postinstall=1 /OsMutationKvm.sh
+
+    while [ "$reboot_ans" != 'yes' -a "$reboot_ans" != 'no' ] ; do
+        echo -ne "\e[1;33mreboot now? (yes/no):\e[m"
+        read reboot_ans
+    done
+
+    if [ "$reboot_ans" == 'yes' ] ; then
+        reboot -f
+    fi
 }
 
 
