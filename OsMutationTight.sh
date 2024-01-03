@@ -124,7 +124,7 @@ function migrate_configuration(){
     # save root password and ssh directory
     sed -i '/^root:/d' "/$dest_os_dir/etc/shadow"
     grep '^root:' /etc/shadow >> "/$dest_os_dir/etc/shadow"
-    [ -d /root/.ssh ] && cp -a "/root/.ssh /$dest_os_dir/root/"
+    [ -d /root/.ssh ] && cp -a cp -a "/root/.ssh" "/$dest_os_dir/root/"
 
     # save network configuration
     dev=$(ip route get 8.8.8.8 | sed -n 's/.*dev \([^\ ]*\).*/\1/p' | head -n 1)
